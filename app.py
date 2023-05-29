@@ -1,11 +1,11 @@
 import platform
 import psutil
 
-
 def get_system_info():
-    """Gets detailed system information."""
 
-    # Get the system name.
+    """ Gets detailed system information """
+
+    # Get the system name
     system_name = platform.system()
 
     # Get the node name.
@@ -35,7 +35,7 @@ def get_system_info():
     # Get the operating system architecture.
     architecture = platform.architecture()[0]
 
-    # Get the amount of free memory.
+    # Get the amount of free memory
     free_memory = round(psutil.virtual_memory().free / 1024 ** 3, 2)
 
     # Get the amount of used memory.
