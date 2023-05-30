@@ -21,7 +21,7 @@ def convert_bytes(bytes):
         bytes /= 1024
         unit += 1
 
-    # Return the formatted string
+    # Return the formatted strings
     return f"{round(bytes, 2)} {SIZE_UNITS[unit]}"
 
 
