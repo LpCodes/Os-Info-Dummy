@@ -1,77 +1,101 @@
 import platform
+
 import psutil
 
-def get_system_info():
 
+SIZE_UNITS = {
+    0: "B",
+    1: "KB",
+    2: "MB",
+    3: "GB",
+    4: "TB"
+}
+
+
+def convert_bytes(bytes):
+    """ Converts bytes to a human-readable format """
+
+    # Find the appropriate unit for the given bytes
+    unit = 0
+    while bytes >= 1024 and unit < len(SIZE_UNITS) - 1:
+        bytes /= 1024
+        unit += 1
+
+    # Return the formatted string
+    return f"{round(bytes, 2)} {SIZE_UNITS[unit]}"
+
+
+def get_system_info():
     """ Gets detailed system information """
 
-    # Get the system name
-    system_name = platform.system()
+    try:
+        # Get the basic system information
+        system_name = platform.system()
+        node_name = platform.node()
+        release = platform.release()
+        version = platform.version()
+        machine = platform.machine()
+        processor = platform.processor()
 
-    # Get the node name.
-    node_name = platform.node()
+        # Get the CPU and memory information
+        number_of_processors = psutil.cpu_count()
+        memory = psutil.virtual_memory()
+        disk_space = psutil.disk_usage("/")
 
-    # Get the release.
-    release = platform.release()
+        # Get the operating system architecture
+        architecture = platform.architecture()[0]
 
-    # Get the version.
-    version = platform.version()
+        # Get the network information
+        network_info = psutil.net_if_addrs()
 
-    # Get the machine.
-    machine = platform.machine()
+        # Get the additional information
+        battery_status = psutil.sensors_battery()
+        boot_time = psutil.boot_time()
+        current_cpu_usage = psutil.cpu_percent()
 
-    # Get the processor.
-    processor = platform.processor()
+        # Print the basic system information
+        print("System name:", system_name)
+        print("Node name:", node_name)
+        print("Release:", release)
+        print("Version:", version)
+        print("Machine:", machine)
+        print("Processor:", processor)
 
-    # Get the number of processors.
-    number_of_processors = psutil.cpu_count()
+        # Print the CPU and memory information
+        print("Number of processors:", number_of_processors)
+        print(
+            f"Memory: {convert_bytes(memory.total)} (free: {convert_bytes(memory.available)}, used: "
+            f"{convert_bytes(memory.used)})")
+        print(
+            f"Disk space: {convert_bytes(disk_space.total)} (free: {convert_bytes(disk_space.free)},"
+            f" used: {convert_bytes(disk_space.used)})")
 
-    # Get the memory.
-    memory = round(psutil.virtual_memory().total / 1024 ** 3)
+        # Print the operating system architecture
+        print("Operating system architecture:", architecture)
 
-    # Get the disk space.
-    disk_space = round(psutil.disk_usage("/").total / 1024 ** 3, 2)
+        # Print the network information
+        print("Network information:")
+        for interface, addresses in network_info.items():
+            print(f"Interface: {interface}")
+            for address in addresses:
+                print(f"- IP: {address.address}")
+                print(f" Netmask: {address.netmask}")
+                print(f" Broadcast IP: {address.broadcast}")
 
-    # Get the operating system architecture.
-    architecture = platform.architecture()[0]
+        # Print the additional information
+        if battery_status:
+            print(f"Battery status: {battery_status.percent}%")
+            if battery_status.power_plugged:
+                print("Power source: AC")
+            else:
+                print("Power source: Battery")
+        else:
+            print("Battery status: N/A")
+        print(f"Boot time: {boot_time}")
+        print(f"Current CPU usage: {current_cpu_usage}%")
 
-    # Get the amount of free memory
-    free_memory = round(psutil.virtual_memory().free / 1024 ** 3, 2)
-
-    # Get the amount of used memory.
-    used_memory = round(memory - free_memory, 2)
-
-    # Get the amount of free disk space.
-    free_disk_space = round(psutil.disk_usage("/").free / 1024 ** 3, 2)
-
-    # Get the amount of used disk space.
-    used_disk_space = round(disk_space - free_disk_space, 2)
-
-    # Get the network information.
-    network_info = psutil.net_if_addrs()
-
-    # Print the system information.
-    print("System name:", system_name)
-    print("Node name:", node_name)
-    print("Release:", release)
-    print("Version:", version)
-    print("Machine:", machine)
-    print("Processor:", processor)
-    print("Number of processors:", number_of_processors)
-    print("Memory:", memory, "GB")
-    print("Disk space:", disk_space, "GB")
-    print("Operating system architecture:", architecture)
-    print("Free memory:", free_memory, "GB")
-    print("Used memory:", used_memory, "GB")
-    print("Free disk space:", free_disk_space, "GB")
-    print("Used disk space:", used_disk_space, "GB")
-    print("Network information:")
-    for interface, addresses in network_info.items():
-        print(f"Interface: {interface}")
-        for address in addresses:
-            print(f"- IP: {address.address}")
-            print(f"  Netmask: {address.netmask}")
-            print(f"  Broadcast IP: {address.broadcast}")
+    except Exception as e:
+        print("An error occurred while retrieving system information:", str(e))
 
 
 if __name__ == "__main__":
